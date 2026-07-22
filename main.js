@@ -28,25 +28,30 @@ const vcard = `BEGIN:VCARD
 //
 function initThemeToggle() {
   const root = document.documentElement;
-  const prefersDark = matchMedia('(prefers-color-scheme: dark)').matches;
-  const saved = localStorage.getItem('theme');
-  const dark = saved ? saved === 'dark' : prefersDark;
-
-  if(dark)
-    root.classList.add('dark');
-
   const btn = document.getElementById('themeToggle');
 
-  if(!btn)
+  if (!btn)
     return;
 
-  btn.setAttribute('aria-pressed', dark);
+  const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
+
+  const applyTheme = (dark) => {
+    root.classList.toggle('dark', dark);
+    btn.setAttribute('aria-pressed', String(dark));
+  };
+
+  applyTheme(mediaQuery.matches);
 
   btn.addEventListener('click', () => {
-    const newDark = root.classList.toggle('dark');
-    btn.setAttribute('aria-pressed', newDark);
-    localStorage.setItem('theme', newDark ? 'dark' : 'light');
+    const currentDark = root.classList.contains('dark');
+    applyTheme(!currentDark);
   });
+
+  if (typeof mediaQuery.addEventListener === 'function') {
+    mediaQuery.addEventListener('change', (event) => applyTheme(event.matches));
+  } else {
+    mediaQuery.addListener((event) => applyTheme(event.matches));
+  }
 }
 
 initThemeToggle();
